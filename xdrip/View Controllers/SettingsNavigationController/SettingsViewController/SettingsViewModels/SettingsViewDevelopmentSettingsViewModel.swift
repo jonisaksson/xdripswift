@@ -11,31 +11,34 @@ fileprivate enum Setting:Int, CaseIterable {
     /// to enable OSLog
     case OSLogEnabled = 2
     
-    /// case smooth libre values
-    case smoothLibreValues = 3
-    
     /// for Libre 2 only, to suppress that app sends unlock payload to Libre 2, in which case xDrip4iOS can run in parallel with other app(s)
-    case suppressUnLockPayLoad = 4
+    case suppressUnLockPayLoad = 3
 
     /// should the BG values be written to a shared app group?
-    case loopShareType = 5
+    case loopShareType = 4
     
     /// if true, then readings will only be written to shared user defaults (for loop) every 5 minutes (>4.5 mins to be exact)
-    case shareToLoopOnceEvery5Minutes = 6
+    case shareToLoopOnceEvery5Minutes = 5
     
     /// to create artificial delay in readings stored in sharedUserDefaults for loop. Minutes - so that Loop receives more smoothed values.
     ///
     /// Default value 0, if used then recommended value is multiple of 5 (eg 5 ot 10)
-    case loopDelay = 7
+    case loopDelay = 6
     
     /// LibreLinkUp version number that will be used for the LLU follower mode http request headers
-    case libreLinkUpVersion = 8
+    case libreLinkUpVersion = 7
     
     /// number of remaining forced complication updates available today
-    case remainingComplicationUserInfoTransfers = 9
+    case remainingComplicationUserInfoTransfers = 8
+    
+    /// how many hours until the canula "expires"? Will show the default value until edited here
+    case CAGEMaxHours = 9
     
     /// allow StandBy mode to show a high contrast version of the widget at night
     case allowStandByHighContrast = 10
+    
+    /// force StandBy mode to show a big number version of the widget
+    case forceStandByBigNumbers = 11
     
 }
 
@@ -74,9 +77,6 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
         case .OSLogEnabled:
             return Texts_SettingsView.osLog
             
-        case .smoothLibreValues:
-            return Texts_SettingsView.smoothLibreValues
-            
         case .suppressUnLockPayLoad:
             return Texts_SettingsView.suppressUnLockPayLoad
             
@@ -95,8 +95,14 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
         case .remainingComplicationUserInfoTransfers:
             return Texts_SettingsView.appleWatchRemainingComplicationUserInfoTransfers
             
+        case .CAGEMaxHours:
+            return Texts_SettingsView.CAGEMaxHours
+            
         case .allowStandByHighContrast:
             return Texts_SettingsView.allowStandByHighContrast
+            
+        case .forceStandByBigNumbers:
+            return Texts_SettingsView.forceStandByBigNumbers
         }
     }
     
@@ -106,10 +112,10 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
         
         switch setting {
             
-        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .smoothLibreValues, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .allowStandByHighContrast:
+        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .allowStandByHighContrast, .forceStandByBigNumbers:
             return .none
             
-        case .loopShareType, .loopDelay, .libreLinkUpVersion, .remainingComplicationUserInfoTransfers:
+        case .loopShareType, .loopDelay, .libreLinkUpVersion, .remainingComplicationUserInfoTransfers, .CAGEMaxHours:
             return .disclosureIndicator
             
         }
@@ -121,7 +127,7 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
         
         switch setting {
             
-        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .smoothLibreValues, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .loopDelay, .allowStandByHighContrast:
+        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .loopDelay, .allowStandByHighContrast, .forceStandByBigNumbers:
             return nil
             
         case .loopShareType:
@@ -137,6 +143,8 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
                 return "-"
             }
             
+        case .CAGEMaxHours:
+            return "\(UserDefaults.standard.CAGEMaxHours.description) \(Texts_Common.hours)"
         }
         
     }
@@ -149,7 +157,7 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
             
         case .showDeveloperSettings:
             return UISwitch(isOn: UserDefaults.standard.showDeveloperSettings, action: {
-                (isOn:Bool) in
+                (isOn: Bool) in
                 
                 UserDefaults.standard.showDeveloperSettings = isOn
                 
@@ -166,7 +174,7 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
             
         case .NSLogEnabled:
             return UISwitch(isOn: UserDefaults.standard.NSLogEnabled, action: {
-                (isOn:Bool) in
+                (isOn: Bool) in
                 
                 UserDefaults.standard.NSLogEnabled = isOn
                 
@@ -179,18 +187,10 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
                 UserDefaults.standard.OSLogEnabled = isOn
                 
             })
-                                        
-        case .smoothLibreValues:
-            return UISwitch(isOn: UserDefaults.standard.smoothLibreValues, action: {
-                (isOn:Bool) in
-                
-                UserDefaults.standard.smoothLibreValues = isOn
-                
-            })
 
         case .suppressUnLockPayLoad:
             return UISwitch(isOn: UserDefaults.standard.suppressUnLockPayLoad, action: {
-                (isOn:Bool) in
+                (isOn: Bool) in
                 
                 UserDefaults.standard.suppressUnLockPayLoad = isOn
                 
@@ -198,7 +198,7 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
             
         case .shareToLoopOnceEvery5Minutes:
             return UISwitch(isOn: UserDefaults.standard.shareToLoopOnceEvery5Minutes, action: {
-                (isOn:Bool) in
+                (isOn: Bool) in
                 
                 UserDefaults.standard.shareToLoopOnceEvery5Minutes = isOn
                 
@@ -206,13 +206,21 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
             
         case .allowStandByHighContrast:
             return UISwitch(isOn: UserDefaults.standard.allowStandByHighContrast, action: {
-                (isOn:Bool) in
+                (isOn: Bool) in
                 
                 UserDefaults.standard.allowStandByHighContrast = isOn
                 
             })
             
-        case .loopShareType, .loopDelay, .remainingComplicationUserInfoTransfers, .libreLinkUpVersion:
+        case .forceStandByBigNumbers:
+            return UISwitch(isOn: UserDefaults.standard.forceStandByBigNumbers, action: {
+                (isOn: Bool) in
+                
+                UserDefaults.standard.forceStandByBigNumbers = isOn
+                
+            })
+            
+        case .loopShareType, .loopDelay, .remainingComplicationUserInfoTransfers, .libreLinkUpVersion, .CAGEMaxHours:
             return nil
             
         }
@@ -229,7 +237,7 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
         
         switch setting {
             
-        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .smoothLibreValues, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .allowStandByHighContrast:
+        case .showDeveloperSettings, .NSLogEnabled, .OSLogEnabled, .suppressUnLockPayLoad, .shareToLoopOnceEvery5Minutes, .allowStandByHighContrast, .forceStandByBigNumbers:
             return .nothing
             
         case .loopShareType:
@@ -285,6 +293,19 @@ class SettingsViewDevelopmentSettingsViewModel: NSObject, SettingsViewModelProto
             return .askConfirmation(title: Texts_SettingsView.appleWatchForceManualComplicationUpdate, message: Texts_SettingsView.appleWatchForceManualComplicationUpdateMessage, actionHandler: {
                 UserDefaults.standard.forceComplicationUpdate = true
             }, cancelHandler: nil)
+            
+        case .CAGEMaxHours:
+            return SettingsSelectedRowAction.askText(title: Texts_SettingsView.CAGEMaxHours, message:  Texts_SettingsView.CAGEMaxHoursMessage, keyboardType: .numberPad, text: UserDefaults.standard.CAGEMaxHours.description, placeHolder: nil, actionTitle: nil, cancelTitle: nil, actionHandler: {(CAGEMaxHoursString: String) in
+                
+                // check that the user entered a plausible value although set it to the default if zero is entered
+                if let CAGEMaxHours = Int(CAGEMaxHoursString) {
+                    if CAGEMaxHours == 0 {
+                        UserDefaults.standard.CAGEMaxHours = ConstantsHomeView.CAGEDefaultMaxHours
+                    } else if CAGEMaxHours > 0 && CAGEMaxHours < 300 {
+                        UserDefaults.standard.CAGEMaxHours = CAGEMaxHours
+                    }
+                }
+            }, cancelHandler: nil, inputValidator: nil)
         }
     }
     

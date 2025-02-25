@@ -208,12 +208,18 @@ enum Texts_HomeView {
         return NSLocalizedString("noDataSourceConnected", tableName: filename, bundle: Bundle.main, value: "No CGM data source connected", comment: "no data source is enabled or connected")
     }()
     
+    // the same as noDataSourceConnected but shorter to display nicely in the Watch app
     static let noDataSourceConnectedWatch: String = {
         return NSLocalizedString("noDataSourceConnectedWatch", tableName: filename, bundle: Bundle.main, value: "No data source", comment: "no data source is enabled or connected")
     }()
     
     static let reconnectLibreDataSource: String = {
         return NSLocalizedString("reconnectLibreDataSource", tableName: filename, bundle: Bundle.main, value: "Disconnect and reconnect Libre sensor", comment: "ask the user to disconnect and reconnect the sensor")
+    }()
+    
+    // used when a CGM Transmitter is connected, but there is no active sensor data yet
+    static let waitingForDataSource: String = {
+        return NSLocalizedString("waitingForDataSource", tableName: filename, bundle: Bundle.main, value: "CGM connected. Waiting for data...", comment: "waiting for data to arrive")
     }()
     
     // make sure any translations are less than 20-22 characters long (including the "%@")
@@ -231,6 +237,10 @@ enum Texts_HomeView {
     
     static let libreLinkUpAccountCredentialsMissing: String = {
         return NSLocalizedString("libreLinkUpAccountCredentialsMissing", tableName: filename, bundle: Bundle.main, value: "Username/password missing", comment: "username and/or password is missing for librelinkup")
+    }()
+    
+    static let showHideItemsTitle: String = {
+        return NSLocalizedString("showHideItemsTitle", tableName: filename, bundle: Bundle.main, value: "Quick Show/Hide", comment: "show or hide various interface items")
     }()
     
 }
